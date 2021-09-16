@@ -1,0 +1,36 @@
+name: test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Runs at 2:00 UTC every day (to give the release process 2h to complete).
+    - cron: '0 2 * * *'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Prevent 60 days of inactivity
+      shell: bash
+      run: |
+        git -c 'user.name=github-actions[bot]' -c 'user.email=41898282+github-actions[bot]@users.noreply.github.com' \
+          commit --allow-empty -m "Reset gh-action 60 day timer"
+        git push
+        git reset --hard HEAD~
+        git push --force
+
+    - name: Log date
+      run: date
